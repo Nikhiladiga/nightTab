@@ -31,7 +31,7 @@ dataSetting.sync = (parent) => {
 
   const control = dataSetting.control.sync;
 
-  if (!GOOGLE_CLIENT_ID || !SYNC_WORKER_URL) {
+  if (typeof chrome === 'undefined' || !chrome.identity || !GOOGLE_CLIENT_ID || !SYNC_WORKER_URL) {
     control.helper = new Control_helperText({
       text: [message.get('menuContentDataSyncNotConfigured')]
     });
@@ -92,6 +92,11 @@ dataSetting.sync = (parent) => {
     func: () => {
       const backup = data.get(APP_NAME + 'Backup');
       if (backup !== null) {
+        // swap, so a second click undoes the restore
+        const current = data.get(APP_NAME);
+        if (current !== null) {
+          data.set(APP_NAME + 'Backup', current);
+        }
         data.set(APP_NAME, backup);
         sync.markChanged();
         data.reload.render();
@@ -109,7 +114,7 @@ dataSetting.sync = (parent) => {
     if (signedIn && sync.status === 'synced' && sync.lastSync) {
       status = status + ' ' + new Date(sync.lastSync).toLocaleString();
     }
-    control.account.textContent = signedIn ? message.get('menuContentDataSyncSignedIn') + ' ' + auth.email() : '';
+    control.account.textContent = signedIn ? (message.get('menuContentDataSyncSignedIn') + ' ' + (auth.email() || '')).trim() : '';
     control.status.textContent = signInError || status;
     control.signIn.button.hidden = signedIn;
     control.signOut.button.hidden = !signedIn;
