@@ -10,6 +10,7 @@ import { layout } from './layout';
 import { menu } from './menu';
 import { pageLock } from './pageLock';
 import { theme } from './theme';
+import { sync } from './sync';
 import { update } from './update';
 import { bookmark } from './bookmark';
 import { header } from './header';
@@ -33,6 +34,7 @@ export const component = {
   menu,
   pageLock,
   theme,
+  sync,
   update,
   bookmark,
   header,

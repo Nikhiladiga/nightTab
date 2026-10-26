@@ -289,12 +289,21 @@ data.restore = (dataToRestore) => {
 };
 
 data.save = () => {
-  data.set(APP_NAME, JSON.stringify({
+  const json = JSON.stringify({
     [APP_NAME]: true,
     version: version.number,
     state: state.get.current(),
     bookmark: bookmark.all
-  }));
+  });
+
+  const changed = json !== data.get(APP_NAME);
+
+  data.set(APP_NAME, json);
+
+  // set by sync.init(); skips saves that change nothing
+  if (changed && data.onChange) {
+    data.onChange();
+  }
 };
 
 data.load = () => {
