@@ -2,6 +2,9 @@ import { message } from '../../message';
 
 import { data } from '../../data';
 import { menu } from '../../menu';
+import { sync } from '../../sync';
+import { auth } from '../../sync/auth';
+import { APP_NAME, GOOGLE_CLIENT_ID, SYNC_WORKER_URL } from '../../../constant';
 
 import * as form from '../../form';
 
@@ -18,9 +21,141 @@ import { node } from '../../../utility/node';
 const dataSetting = {};
 
 dataSetting.control = {
+  sync: {},
   restore: {},
   backup: {},
   clear: {}
+};
+
+dataSetting.sync = (parent) => {
+
+  const control = dataSetting.control.sync;
+
+  if (!GOOGLE_CLIENT_ID || !SYNC_WORKER_URL) {
+    control.helper = new Control_helperText({
+      text: [message.get('menuContentDataSyncNotConfigured')]
+    });
+    parent.appendChild(node('div', [control.helper.wrap()]));
+    return;
+  }
+
+  const statusKey = {
+    'signed-out': 'menuContentDataSyncStatusSignedOut',
+    'syncing': 'menuContentDataSyncStatusSyncing',
+    'synced': 'menuContentDataSyncStatusSynced',
+    'offline': 'menuContentDataSyncStatusOffline',
+    'error': 'menuContentDataSyncStatusError',
+    'blocked': 'menuContentDataSyncStatusBlocked',
+    'reauth': 'menuContentDataSyncStatusReauth'
+  };
+
+  let signInError = '';
+
+  control.account = node('p|class:small');
+  control.status = node('p|class:small');
+
+  control.signIn = new Button({
+    text: message.get('menuContentDataSyncSignIn'),
+    style: ['line'],
+    func: async () => {
+      signInError = '';
+      try {
+        await sync.signIn();
+      } catch (error) {
+        signInError = error.message;
+      }
+      control.render();
+    }
+  });
+
+  control.signOut = new Button({
+    text: message.get('menuContentDataSyncSignOut'),
+    style: ['line'],
+    func: async () => {
+      signInError = '';
+      await sync.signOut();
+      control.render();
+    }
+  });
+
+  control.now = new Button({
+    text: message.get('menuContentDataSyncNow'),
+    style: ['line'],
+    func: () => {
+      sync.run();
+    }
+  });
+
+  control.restoreBackup = new Button({
+    text: message.get('menuContentDataSyncRestoreBackup'),
+    style: ['line'],
+    func: () => {
+      const backup = data.get(APP_NAME + 'Backup');
+      if (backup !== null) {
+        data.set(APP_NAME, backup);
+        sync.markChanged();
+        data.reload.render();
+      }
+    }
+  });
+
+  control.restoreHelper = new Control_helperText({
+    text: [message.get('menuContentDataSyncRestoreBackupHelper')]
+  });
+
+  control.render = () => {
+    const signedIn = auth.isSignedIn();
+    let status = message.get(statusKey[sync.status] || statusKey['signed-out']);
+    if (signedIn && sync.status === 'synced' && sync.lastSync) {
+      status = status + ' ' + new Date(sync.lastSync).toLocaleString();
+    }
+    control.account.textContent = signedIn ? message.get('menuContentDataSyncSignedIn') + ' ' + auth.email() : '';
+    control.status.textContent = signInError || status;
+    control.signIn.button.hidden = signedIn;
+    control.signOut.button.hidden = !signedIn;
+    control.now.button.hidden = !signedIn;
+    if (data.get(APP_NAME + 'Backup') === null) {
+      control.restoreBackup.disable();
+    } else {
+      control.restoreBackup.enable();
+    }
+  };
+
+  sync.onStatus(control.render);
+
+  control.render();
+
+  parent.appendChild(
+    node('div', [
+      form.wrap({
+        children: [
+          control.account,
+          control.status
+        ]
+      }),
+      form.wrap({
+        children: [
+          form.inline({
+            gap: 'small',
+            equalGap: true,
+            wrap: true,
+            children: [
+              control.signIn.wrap(),
+              control.signOut.wrap(),
+              control.now.wrap()
+            ]
+          })
+        ]
+      }),
+      form.wrap({
+        children: [
+          control.restoreBackup.wrap()
+        ]
+      }),
+      control.restoreHelper.wrap()
+    ])
+  );
+
 };
 
 dataSetting.restore = (parent) => {

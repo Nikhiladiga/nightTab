@@ -203,6 +203,10 @@
     "message": "Data",
     "description": "Label for the settings menu navigation."
   },
+  "menuNavDataSubNavSync": {
+    "message": "Sync",
+    "description": "Label for the settings menu navigation."
+  },
   "menuNavDataSubNavRestore": {
     "message": "Restore",
     "description": "Label for the settings menu navigation."
@@ -1794,6 +1798,62 @@
   "menuContentDataClearHelperPara2": {
     "message": "Alternatively, it is possible to wipe all settings but keep the current Bookmarks and Groups.",
     "description": "Helper text for clear all data."
+  },
+  "menuContentDataSyncSignIn": {
+    "message": "Sign in with Google",
+    "description": "Button to sign in for sync."
+  },
+  "menuContentDataSyncSignOut": {
+    "message": "Sign out",
+    "description": "Button to sign out of sync."
+  },
+  "menuContentDataSyncSignedIn": {
+    "message": "Signed in as",
+    "description": "Label before the signed in email."
+  },
+  "menuContentDataSyncNow": {
+    "message": "Sync now",
+    "description": "Button to sync now."
+  },
+  "menuContentDataSyncStatusSynced": {
+    "message": "Synced",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusSyncing": {
+    "message": "Syncing",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusOffline": {
+    "message": "Offline. Changes upload when you are back online.",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusError": {
+    "message": "Sync failed. nightTab tries again on the next tab.",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusBlocked": {
+    "message": "Update nightTab to sync. Your cloud config is from a newer version.",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusReauth": {
+    "message": "Sign in again to keep syncing.",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncStatusSignedOut": {
+    "message": "Sign in to save your setup to your Google Drive and load it on other laptops.",
+    "description": "Sync status."
+  },
+  "menuContentDataSyncRestoreBackup": {
+    "message": "Restore backup",
+    "description": "Button to restore the backup made before a sync change."
+  },
+  "menuContentDataSyncRestoreBackupHelper": {
+    "message": "Replaces your current setup with the copy saved before the last sync change.",
+    "description": "Helper text for restore backup."
+  },
+  "menuContentDataSyncNotConfigured": {
+    "message": "Sync is not set up in this build. See docs/sync-setup.md.",
+    "description": "Helper text when sync is not configured."
   },
   "menuContentLanguageSelect": {
     "message": "Language",
