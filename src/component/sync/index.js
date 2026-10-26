@@ -73,6 +73,11 @@ const cycle = async () => {
     saveMeta({ dirty: current.modified !== meta.modified, modified: current.modified, synced: result.modifiedTime, fileId: result.id });
   } else if (action === 'pull') {
     const remoteData = await drive.download(token, file.id);
+    // an edit made during the download must not be overwritten; decide again
+    if (loadMeta().modified !== meta.modified) {
+      rerun = true;
+      return;
+    }
     if (backupLocal && local !== null) {
       data.backup(JSON.parse(local));
     }
