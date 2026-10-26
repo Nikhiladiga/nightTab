@@ -22,7 +22,7 @@ const run = (meta, remote) => decide({
 const remoteAt = (modifiedTime, modified = 0, version = '7.6.0') => ({ modifiedTime, version, modified });
 
 test('no remote pushes', () => {
-  assert.deepEqual(run({}, null), { action: 'push', backupLocal: false });
+  assert.deepEqual(run({}, null), { action: 'push', backupLocal: false, backupRemote: false });
 });
 
 test('newer remote version is blocked', () => {
@@ -30,23 +30,27 @@ test('newer remote version is blocked', () => {
 });
 
 test('first sign-in pulls with backup', () => {
-  assert.deepEqual(run({ synced: 0, dirty: true }, remoteAt(200)), { action: 'pull', backupLocal: true });
+  assert.deepEqual(run({ synced: 0, dirty: true }, remoteAt(200)), { action: 'pull', backupLocal: true, backupRemote: false });
 });
 
 test('remote changed and local clean pulls without backup', () => {
-  assert.deepEqual(run({ synced: 100 }, remoteAt(200)), { action: 'pull', backupLocal: false });
+  assert.deepEqual(run({ synced: 100 }, remoteAt(200)), { action: 'pull', backupLocal: false, backupRemote: false });
 });
 
 test('local dirty and remote unchanged pushes', () => {
   assert.equal(run({ synced: 200, dirty: true }, remoteAt(200)).action, 'push');
 });
 
-test('both changed, local newer pushes', () => {
-  assert.equal(run({ synced: 100, dirty: true, modified: 60 }, remoteAt(200, 50)).action, 'push');
+test('both changed, local newer pushes with remote backup', () => {
+  assert.deepEqual(run({ synced: 100, dirty: true, modified: 60 }, remoteAt(200, 50)), { action: 'push', backupLocal: false, backupRemote: true });
+});
+
+test('local dirty and remote unchanged pushes without remote backup', () => {
+  assert.deepEqual(run({ synced: 200, dirty: true }, remoteAt(200)), { action: 'push', backupLocal: false, backupRemote: false });
 });
 
 test('both changed, remote newer pulls with backup', () => {
-  assert.deepEqual(run({ synced: 100, dirty: true, modified: 60 }, remoteAt(200, 70)), { action: 'pull', backupLocal: true });
+  assert.deepEqual(run({ synced: 100, dirty: true, modified: 60 }, remoteAt(200, 70)), { action: 'pull', backupLocal: true, backupRemote: false });
 });
 
 test('nothing changed does nothing', () => {

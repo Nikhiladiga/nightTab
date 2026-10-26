@@ -61,3 +61,4 @@ Use two Chrome profiles signed in to different Chrome accounts. Sign in to the s
 5. In DevTools, set network throttling to Slow 3G. Open a new tab so a pull starts. Edit a bookmark before the pull ends. The edit is still there after the pull.
 6. Open the Data menu, then the Sync tab. Click **Restore backup**. Your current setup goes into the backup slot. The backup is applied. The change uploads to Drive.
 7. Click **Restore backup** again. This undoes the restore, and the change uploads again.
+8. Edit a bookmark in profile A. In profile B, open a new tab and open the menu before the pull ends. A's edit is in both profiles, or it is in B's backup slot (Data menu, Sync tab, **Restore backup**).

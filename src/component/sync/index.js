@@ -51,16 +51,25 @@ sync.changed = () => {
   }
 };
 
-const cycle = async () => {
+const cycle = async (previous) => {
   const token = await auth.getToken();
   const file = await drive.findFile(token, SYNC_FILE_NAME);
   // a missing or NaN remote.modified counts as 0
   const remote = file ? { ...file, modified: file.modified || 0 } : null;
   const meta = loadMeta();
   const local = data.get(APP_NAME);
-  const { action, backupLocal } = decide({ meta, remote, appVersion: version.number, compareVersion: version.compare });
+  const { action, backupLocal, backupRemote } = decide({ meta, remote, appVersion: version.number, compareVersion: version.compare });
 
-  if (action === 'push' && local !== null) {
+  if (action === 'push' && local === null) {
+    // nothing to upload, so nothing was synced
+    setStatus(previous);
+    return;
+  }
+
+  if (action === 'push') {
+    if (backupRemote) {
+      data.backup(await drive.download(token, file.id));
+    }
     const result = await drive.upload(token, {
       id: file ? file.id : null,
       name: SYNC_FILE_NAME,
@@ -107,9 +116,10 @@ sync.run = async () => {
     return;
   }
   running = true;
+  const previous = sync.status;
   setStatus('syncing');
   try {
-    await cycle();
+    await cycle(previous);
   } catch (error) {
     if (error instanceof AuthError) {
       setStatus('reauth');
@@ -147,9 +157,21 @@ sync.init = () => {
   sync.ready = true;
   // data cannot import sync (import cycle), so sync registers its hook
   data.onChange = sync.changed;
+  // another tab wrote the config: reload, or this tab's next save pushes old state
+  const stale = () => data.get(APP_NAME) !== data.saved;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+    if (document.visibilityState !== 'visible') {
+      return;
+    }
+    if (stale()) {
+      data.reload.render();
+    } else {
       sync.run();
+    }
+  });
+  window.addEventListener('storage', (event) => {
+    if (event.key === APP_NAME && document.visibilityState === 'visible' && stale()) {
+      data.reload.render();
     }
   });
   window.addEventListener('online', sync.run);

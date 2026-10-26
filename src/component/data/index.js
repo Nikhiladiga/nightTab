@@ -6,6 +6,7 @@ import { menu } from '../menu';
 import { version } from '../version';
 import { update } from '../update';
 import { APP_NAME } from '../../constant';
+import { syncable } from '../sync/syncable';
 
 import { Modal } from '../modal';
 import { ImportForm } from '../importForm';
@@ -296,9 +297,12 @@ data.save = () => {
     bookmark: bookmark.all
   });
 
-  const changed = json !== data.get(APP_NAME);
+  const changed = syncable(json) !== syncable(data.get(APP_NAME));
 
   data.set(APP_NAME, json);
+
+  // what this tab last wrote; sync compares it to find a stale tab
+  data.saved = json;
 
   // set by sync.init(); skips saves that change nothing
   if (changed && data.onChange) {
@@ -465,6 +469,7 @@ data.feedback.animation = {
 };
 
 data.init = () => {
+  data.saved = data.get(APP_NAME);
   data.restore(data.load());
 };
 

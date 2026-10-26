@@ -116,7 +116,7 @@ dataSetting.sync = (parent) => {
     }
     control.account.textContent = signedIn ? (message.get('menuContentDataSyncSignedIn') + ' ' + (auth.email() || '')).trim() : '';
     control.status.textContent = signInError || status;
-    control.signIn.button.hidden = signedIn;
+    control.signIn.button.hidden = signedIn && sync.status !== 'reauth';
     control.signOut.button.hidden = !signedIn;
     control.now.button.hidden = !signedIn;
     if (data.get(APP_NAME + 'Backup') === null) {
