@@ -1,0 +1,8 @@
+name = "nighttab-sync"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+# comma separated, for example "chrome-extension://<extension id>"
+ALLOWED_ORIGINS = ""
+GOOGLE_CLIENT_ID = ""
