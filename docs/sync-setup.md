@@ -10,18 +10,26 @@ Follow these steps once. Sync does not work until you finish them.
 4. Add these scopes: `https://www.googleapis.com/auth/drive.appdata`, `openid`, `email`.
 5. Add your Google account as a test user.
 6. Set the publishing status to **In production** soon. In Testing mode, refresh tokens expire after 7 days.
-7. Go to **Credentials**. Create an OAuth client of type **Web application**.
-8. Add two redirect URIs:
-   - `https://<dev-extension-id>.chromiumapp.org/`
-   - `https://<store-extension-id>.chromiumapp.org/`
-9. Find the dev ID at `chrome://extensions`. The store ID exists after the first Web Store upload.
-10. Copy the client ID and the client secret.
-11. Deploy the Worker. Follow `worker/readme.md`.
-12. Set `ALLOWED_ORIGINS=chrome-extension://<dev-id>,chrome-extension://<store-id>` in `worker/wrangler.toml`.
-13. Set `GOOGLE_CLIENT_ID` and `SYNC_WORKER_URL` in `src/constant/index.js`.
-14. Run `npm run build`.
-15. Open `chrome://extensions`. Turn on Developer mode. Click **Load unpacked** and choose `dist/web`.
-16. Open the Data menu. Click Sync and sign in.
+7. Run `npm run build`. Open `chrome://extensions`. Turn on Developer mode. Click **Load unpacked** and choose `dist/web`. Copy the extension ID.
+8. Do not move the `dist/web` folder after this step. The manifest has no `key`, so a new path gives a new ID. A new ID breaks the redirect URI and `ALLOWED_ORIGINS`.
+9. Go to **Credentials**. Create an OAuth client of type **Web application**.
+10. Add the redirect URI `https://<dev-extension-id>.chromiumapp.org/`.
+11. Copy the client ID and the client secret.
+12. Open `worker/wrangler.toml`. Set `GOOGLE_CLIENT_ID` to the client ID.
+13. Set `ALLOWED_ORIGINS=chrome-extension://<dev-id>` in the same file.
+14. Run `npx wrangler login`. Run `npx wrangler secret put GOOGLE_CLIENT_SECRET` in `worker/` and paste the secret.
+15. Run `npx wrangler deploy` in `worker/`. Copy the `*.workers.dev` URL. See `worker/readme.md`.
+16. Set `GOOGLE_CLIENT_ID` and `SYNC_WORKER_URL` in `src/constant/index.js`.
+17. Run `npm run build`. Click reload for the extension in `chrome://extensions`.
+18. Open the Data menu, then the Sync tab. Click **Sign in with Google**.
+
+### After the first Web Store upload
+
+The store ID exists only after the first upload.
+
+1. Add the redirect URI `https://<store-extension-id>.chromiumapp.org/` to the OAuth client.
+2. Set `ALLOWED_ORIGINS=chrome-extension://<dev-id>,chrome-extension://<store-id>` in `worker/wrangler.toml`.
+3. Run `npx wrangler deploy` again.
 
 ## Facts checked against Google docs
 
@@ -37,10 +45,10 @@ Follow these steps once. Sync does not work until you finish them.
 
 ## Web Store notes
 
-- Keep the `LICENSE` file and the copyright notice.
+- Keep the `license` file and the copyright notice.
 - Credit "Based on nightTab by zombieFox" with a link to https://github.com/zombieFox/nightTab.
 - Use a new name and a new icon.
-- Add a privacy policy. Google requires one for the Drive scope.
+- Add a privacy policy. The Chrome Web Store requires one for extensions that handle user data. Config data goes to Drive, so this applies. [Developer program policy](https://developer.chrome.com/docs/webstore/program-policies/privacy)
 
 ## Verify it works
 
@@ -49,6 +57,7 @@ Use two Chrome profiles signed in to different Chrome accounts. Sign in to the s
 1. Reload the page with no edits. The Network panel shows no upload request.
 2. Edit a bookmark. One upload happens about 3 seconds later.
 3. In the second profile, open a new tab. It shows the edit.
-4. In DevTools, set the network to offline. Edit a bookmark. Go online. The upload happens. `SyncMeta.dirty` was `true` while offline.
+4. In DevTools, set the network to offline. Edit a bookmark. Go online. The upload happens. `dirty` in the `nightTabSyncMeta` localStorage key was `true` while offline.
 5. In DevTools, set network throttling to Slow 3G. Open a new tab so a pull starts. Edit a bookmark before the pull ends. The edit is still there after the pull.
-6. Click **Restore backup** in the Data menu. Check that the restored data replaces the config and syncs to Drive.
+6. Open the Data menu, then the Sync tab. Click **Restore backup**. Your current setup goes into the backup slot. The backup is applied. The change uploads to Drive.
+7. Click **Restore backup** again. This undoes the restore, and the change uploads again.
