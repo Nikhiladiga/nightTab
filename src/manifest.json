@@ -4,6 +4,7 @@
   "description": "__MSG_appDescription__",
   "version": "7.6.0",
   "manifest_version": 3,
+  "permissions": ["identity"],
   "default_locale": "en_GB",
   "chrome_url_overrides": {
     "newtab": "index.html"
