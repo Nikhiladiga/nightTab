@@ -7,7 +7,7 @@
     "start": "webpack serve --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "lint": "eslint",
-    "test": "node --test"
+    "test": "node --test && node --test .claude/skills/nighttab-config/scripts/nighttab.test.mjs"
   },
   "keywords": [
     "startpage",
